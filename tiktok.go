@@ -105,7 +105,9 @@ func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*o
 	}
 
 	tokenExtra := map[string]interface{}{
-		"open_id": body.Data.OpenID,
+		"open_id":            body.Data.OpenID,
+		"scope":              body.Data.Scope,
+		"refresh_expires_in": body.Data.RefreshExpiresIn,
 	}
 
 	return token.WithExtra(tokenExtra), nil
@@ -165,7 +167,9 @@ func RefreshToken(ctx context.Context, clientKey, refreshToken string) (*oauth2.
 	}
 
 	tokenExtra := map[string]interface{}{
-		"open_id": body.Data.OpenID,
+		"open_id":            body.Data.OpenID,
+		"scope":              body.Data.Scope,
+		"refresh_expires_in": body.Data.RefreshExpiresIn,
 	}
 
 	return token.WithExtra(tokenExtra), nil

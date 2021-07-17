@@ -183,8 +183,19 @@ func TestConfigExchangeSuccess(t *testing.T) {
 		t.Fatalf("expected refresh token 'test-refresh-token', but got %s", token.RefreshToken)
 	}
 
-	if extraOpenID := token.Extra("open_id"); extraOpenID != "test-open-id" {
+	extraOpenID := token.Extra("open_id")
+	if extraOpenID != "test-open-id" {
 		t.Fatalf("expected extra field open_id 'test-open-id', but got %s", extraOpenID)
+	}
+
+	extraScope := token.Extra("scope")
+	if extraScope != "test-scope-1,test-scope-2" {
+		t.Fatalf("expected extra field scope 'test-scope-1,test-scope-2', but got %s", extraScope)
+	}
+
+	extraRefreshExpiresIn := token.Extra("refresh_expires_in").(int64)
+	if extraRefreshExpiresIn != 31536000 {
+		t.Fatalf("expected extra field refresh_expires_in '31536000', but got %d", extraRefreshExpiresIn)
 	}
 }
 
@@ -296,8 +307,19 @@ func TestRefreshTokenSuccess(t *testing.T) {
 		t.Fatalf("expected refresh token 'test-refresh-token', but got %s", token.RefreshToken)
 	}
 
-	if extraOpenID := token.Extra("open_id"); extraOpenID != "test-open-id" {
+	extraOpenID := token.Extra("open_id")
+	if extraOpenID != "test-open-id" {
 		t.Fatalf("expected extra field open_id 'test-open-id', but got %s", extraOpenID)
+	}
+
+	extraScope := token.Extra("scope")
+	if extraScope != "test-scope-1,test-scope-2" {
+		t.Fatalf("expected extra field scope 'test-scope-1,test-scope-2', but got %s", extraScope)
+	}
+
+	extraRefreshExpiresIn := token.Extra("refresh_expires_in").(int64)
+	if extraRefreshExpiresIn != 31536000 {
+		t.Fatalf("expected extra field refresh_expires_in '31536000', but got %d", extraRefreshExpiresIn)
 	}
 }
 
