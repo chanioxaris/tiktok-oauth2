@@ -4,6 +4,7 @@ const (
 	endpointAuth     = "https://open-api.tiktok.com/platform/oauth/connect/"
 	endpointToken    = "https://open-api.tiktok.com/oauth/access_token/"
 	endpointRefresh  = "https://open-api.tiktok.com/oauth/refresh_token/"
+	endpointRevoke   = "https://open-api.tiktok.com/oauth/revoke/"
 	endpointUserInfo = "https://open-api.tiktok.com/oauth/userinfo/"
 )
 

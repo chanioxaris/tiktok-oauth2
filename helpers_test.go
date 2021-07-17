@@ -29,6 +29,11 @@ var (
 		"grant_type":    "refresh_token",
 	}
 
+	revokeParameters = map[string]string{
+		"access_token": "test-access-token",
+		"open_id":      "test-open-id",
+	}
+
 	userInfoParameters = map[string]string{
 		"access_token": "test-access-token",
 		"open_id":      "test-open-id",
