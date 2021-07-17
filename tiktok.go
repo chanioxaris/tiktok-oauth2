@@ -17,6 +17,39 @@ var (
 	httpClient = &http.Client{Timeout: time.Second * 10}
 )
 
+// NewConfig returns a new TikTok oauth2 config based on provided arguments.
+func NewConfig(clientID, clientSecret, redirectURL string, scopes ...string) (*oauth2.Config, error) {
+	if clientID == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: client id cannot be empty")
+	}
+
+	if clientSecret == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: client secret cannot be empty")
+	}
+
+	if redirectURL == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: redirect url cannot be empty")
+	}
+
+	cfg := &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Scopes:       scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   "https://open-api.tiktok.com/platform/oauth/connect/",
+			TokenURL:  "https://open-api.tiktok.com/oauth/access_token/",
+			AuthStyle: oauth2.AuthStyleInParams,
+		},
+	}
+
+	if len(cfg.Scopes) == 0 {
+		cfg.Scopes = []string{"user.info.basic"}
+	}
+
+	return cfg, nil
+}
+
 // ConfigExchange converts an oauth2 config and authorization code into an oauth2 token.
 func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*oauth2.Token, error) {
 	if config == nil {
