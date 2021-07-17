@@ -177,18 +177,9 @@ func RefreshToken(ctx context.Context, clientKey, refreshToken string) (*oauth2.
 
 // RevokeAccess revokes a user's access token.
 func RevokeAccess(ctx context.Context, token *oauth2.Token) error {
-	if token == nil {
-		return fmt.Errorf("tiktok-oauth2: RevokeAccess: token cannot be nil")
-	}
-
-	extraOpenID := token.Extra("open_id")
-	if extraOpenID == nil {
-		return fmt.Errorf("tiktok-oauth2: RevokeAccess: token missing open id")
-	}
-
-	openID, ok := extraOpenID.(string)
-	if !ok {
-		return fmt.Errorf("tiktok-oauth2: RevokeAccess: expected token open id to be a string")
+	openID, err := OpenIDFromToken(token)
+	if err != nil {
+		return fmt.Errorf("tiktok-oauth2: RevokeAccess: failed to get open_id from token")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpointRevoke, nil)
@@ -222,18 +213,9 @@ func RevokeAccess(ctx context.Context, token *oauth2.Token) error {
 
 // RetrieveUserInfo returns some basic information of a given TikTok user based on the open id.
 func RetrieveUserInfo(ctx context.Context, token *oauth2.Token) (*UserInfo, error) {
-	if token == nil {
-		return nil, fmt.Errorf("tiktok-oauth2: RetrieveUserInfo: token cannot be nil")
-	}
-
-	extraOpenID := token.Extra("open_id")
-	if extraOpenID == nil {
-		return nil, fmt.Errorf("tiktok-oauth2: RetrieveUserInfo: token missing open id")
-	}
-
-	openID, ok := extraOpenID.(string)
-	if !ok {
-		return nil, fmt.Errorf("tiktok-oauth2: RetrieveUserInfo: expected token open id to be a string")
+	openID, err := OpenIDFromToken(token)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: RetrieveUserInfo: failed to get open_id from token")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpointUserInfo, nil)

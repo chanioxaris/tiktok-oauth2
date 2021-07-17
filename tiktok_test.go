@@ -374,17 +374,17 @@ func TestRevokeAccessInvalidArguments(t *testing.T) {
 		{
 			name:          "nil token",
 			token:         nil,
-			errorContains: "RevokeAccess: token cannot be nil",
+			errorContains: "RevokeAccess: failed to get open_id from token",
 		},
 		{
 			name:          "token without open_id",
 			token:         testNewOauthToken(t),
-			errorContains: "RevokeAccess: token missing open id",
+			errorContains: "RevokeAccess: failed to get open_id from token",
 		},
 		{
 			name:          "token with invalid open_id type",
 			token:         testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": 1}),
-			errorContains: "RevokeAccess: expected token open id to be a string",
+			errorContains: "RevokeAccess: failed to get open_id from token",
 		},
 	}
 
@@ -453,17 +453,17 @@ func TestRetrieveUserInfoInvalidArguments(t *testing.T) {
 		{
 			name:          "nil token",
 			token:         nil,
-			errorContains: "RetrieveUserInfo: token cannot be nil",
+			errorContains: "RetrieveUserInfo: failed to get open_id from token",
 		},
 		{
 			name:          "token without open_id",
 			token:         testNewOauthToken(t),
-			errorContains: "RetrieveUserInfo: token missing open id",
+			errorContains: "RetrieveUserInfo: failed to get open_id from token",
 		},
 		{
 			name:          "token with invalid open_id type",
 			token:         testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": 1}),
-			errorContains: "RetrieveUserInfo: expected token open id to be a string",
+			errorContains: "RetrieveUserInfo: failed to get open_id from token",
 		},
 	}
 
