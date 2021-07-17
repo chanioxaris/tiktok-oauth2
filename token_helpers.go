@@ -6,6 +6,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// OpenIDFromToken is a helper function to retrieve 'open_id' extra field from an oauth2 token.
 func OpenIDFromToken(token *oauth2.Token) (string, error) {
 	if token == nil {
 		return "", fmt.Errorf("tiktok-oauth2: OpenIDFromToken: token cannot be nil")
@@ -24,6 +25,7 @@ func OpenIDFromToken(token *oauth2.Token) (string, error) {
 	return openID, nil
 }
 
+// ScopeFromToken is a helper function to retrieve 'scope' extra field from an oauth2 token.
 func ScopeFromToken(token *oauth2.Token) (string, error) {
 	if token == nil {
 		return "", fmt.Errorf("tiktok-oauth2: ScopeFromToken: token cannot be nil")
@@ -42,6 +44,7 @@ func ScopeFromToken(token *oauth2.Token) (string, error) {
 	return scope, nil
 }
 
+// RefreshExpiresInFromToken is a helper function to retrieve 'refresh_expires_in' extra field from an oauth2 token.
 func RefreshExpiresInFromToken(token *oauth2.Token) (int64, error) {
 	if token == nil {
 		return 0, fmt.Errorf("tiktok-oauth2: RefreshExpiresInFromToken: token cannot be nil")

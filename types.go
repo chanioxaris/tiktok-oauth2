@@ -8,6 +8,7 @@ const (
 	endpointUserInfo = "https://open-api.tiktok.com/oauth/userinfo/"
 )
 
+// UserInfo holds some basic information of a given TikTok user.
 type UserInfo struct {
 	OpenID       string
 	UnionID      string

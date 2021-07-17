@@ -99,7 +99,7 @@ func TestNewConfigSuccess(t *testing.T) {
 
 			if tt.scopes != nil {
 				if len(got.Scopes) != len(tt.scopes) {
-					t.Fatalf("expected scopes lenght '%d', but got %d", len(tt.scopes), len(got.Scopes))
+					t.Fatalf("expected scopes length '%d', but got %d", len(tt.scopes), len(got.Scopes))
 				}
 
 				if !reflect.DeepEqual(got.Scopes, tt.scopes) {
@@ -107,7 +107,7 @@ func TestNewConfigSuccess(t *testing.T) {
 				}
 			} else {
 				if len(got.Scopes) != 1 {
-					t.Fatalf("expected scopes lenght '1', but got %d", len(got.Scopes))
+					t.Fatalf("expected scopes length '1', but got %d", len(got.Scopes))
 				}
 
 				if got.Scopes[0] != "user.info.basic" {
