@@ -23,20 +23,20 @@ func TestNewConfigInvalidArguments(t *testing.T) {
 		{
 			name:          "empty client id",
 			clientID:      "",
-			errorContains: "client id cannot be empty",
+			errorContains: "NewConfig: client id cannot be empty",
 		},
 		{
 			name:          "empty client secret",
 			clientID:      "test-client-id",
 			clientSecret:  "",
-			errorContains: "client secret cannot be empty",
+			errorContains: "NewConfig: client secret cannot be empty",
 		},
 		{
 			name:          "empty redirect url",
 			clientID:      "test-client-id",
 			clientSecret:  "test-client-secret",
 			redirectURL:   "",
-			errorContains: "redirect url cannot be empty",
+			errorContains: "NewConfig: redirect url cannot be empty",
 		},
 	}
 
@@ -129,13 +129,13 @@ func TestConfigExchangeInvalidArguments(t *testing.T) {
 			name:          "nil config",
 			config:        nil,
 			code:          "test-code",
-			errorContains: "config cannot be nil",
+			errorContains: "ConfigExchange: config cannot be nil",
 		},
 		{
 			name:          "empty code",
 			config:        testNewOauthConfig(t),
 			code:          "",
-			errorContains: "code cannot be empty",
+			errorContains: "ConfigExchange: code cannot be empty",
 		},
 	}
 
@@ -206,8 +206,8 @@ func TestConfigExchangeError(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "Request error [1000]") {
-		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
+	if !strings.Contains(err.Error(), "ConfigExchange: Request error [1000]") {
+		t.Fatalf("expected error to contain 'ConfigExchange: Request error [1000]', but got '%v'", err)
 	}
 }
 
@@ -229,8 +229,8 @@ func TestConfigExchangeEmptyAccessToken(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "server response missing access_token") {
-		t.Fatalf("expected error to contain 'server response missing access_token', but got '%v'", err)
+	if !strings.Contains(err.Error(), "ConfigExchange: server response missing access_token") {
+		t.Fatalf("expected error to contain 'ConfigExchange: server response missing access_token', but got '%v'", err)
 	}
 }
 
@@ -244,13 +244,13 @@ func TestRefreshTokenInvalidArguments(t *testing.T) {
 		{
 			name:          "empty client key",
 			clientKey:     "",
-			errorContains: "client key cannot be empty",
+			errorContains: "RefreshToken: client key cannot be empty",
 		},
 		{
 			name:          "empty refresh token",
 			clientKey:     "test-client-key",
 			refreshToken:  "",
-			errorContains: "refresh token cannot be empty",
+			errorContains: "RefreshToken: refresh token cannot be empty",
 		},
 	}
 
@@ -317,8 +317,8 @@ func TestRefreshTokenError(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "Request error [1000]") {
-		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
+	if !strings.Contains(err.Error(), "RefreshToken: Request error [1000]") {
+		t.Fatalf("expected error to contain 'RefreshToken: Request error [1000]', but got '%v'", err)
 	}
 }
 
@@ -338,8 +338,8 @@ func TestRefreshTokenEmptyAccessToken(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "server response missing access_token") {
-		t.Fatalf("expected error to contain 'server response missing access_token', but got '%v'", err)
+	if !strings.Contains(err.Error(), "RefreshToken: server response missing access_token") {
+		t.Fatalf("expected error to contain 'RefreshToken: server response missing access_token', but got '%v'", err)
 	}
 }
 
@@ -352,17 +352,17 @@ func TestRevokeAccessInvalidArguments(t *testing.T) {
 		{
 			name:          "nil token",
 			token:         nil,
-			errorContains: "token cannot be nil",
+			errorContains: "RevokeAccess: token cannot be nil",
 		},
 		{
 			name:          "token without open_id",
 			token:         testNewOauthToken(t),
-			errorContains: "token missing open id",
+			errorContains: "RevokeAccess: token missing open id",
 		},
 		{
 			name:          "token with invalid open_id type",
 			token:         testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": 1}),
-			errorContains: "expected token open id to be a string",
+			errorContains: "RevokeAccess: expected token open id to be a string",
 		},
 	}
 
@@ -417,8 +417,8 @@ func TestRevokeAccessError(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "Request error [1000]") {
-		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
+	if !strings.Contains(err.Error(), "RevokeAccess: Request error [1000]") {
+		t.Fatalf("RevokeAccess: expected error to contain 'Request error [1000]', but got '%v'", err)
 	}
 }
 
@@ -431,17 +431,17 @@ func TestRetrieveUserInfoInvalidArguments(t *testing.T) {
 		{
 			name:          "nil token",
 			token:         nil,
-			errorContains: "token cannot be nil",
+			errorContains: "RetrieveUserInfo: token cannot be nil",
 		},
 		{
 			name:          "token without open_id",
 			token:         testNewOauthToken(t),
-			errorContains: "token missing open id",
+			errorContains: "RetrieveUserInfo: token missing open id",
 		},
 		{
 			name:          "token with invalid open_id type",
 			token:         testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": 1}),
-			errorContains: "expected token open id to be a string",
+			errorContains: "RetrieveUserInfo: expected token open id to be a string",
 		},
 	}
 
@@ -516,7 +516,7 @@ func TestRetrieveUserInfoError(t *testing.T) {
 		t.Fatal("expected error but got nil")
 	}
 
-	if !strings.Contains(err.Error(), "Request error [1000]") {
-		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
+	if !strings.Contains(err.Error(), "RetrieveUserInfo: Request error [1000]") {
+		t.Fatalf("expected error to contain 'RetrieveUserInfo: Request error [1000]', but got '%v'", err)
 	}
 }
