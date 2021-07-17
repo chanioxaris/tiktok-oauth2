@@ -84,12 +84,72 @@ func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*o
 		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
 	}
 
-	var body configExchangeResponse
+	var body tokenResponse
 	if err = json.Unmarshal(bodyBytes, &body); err != nil {
 		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
 	}
 
-	if body == (configExchangeResponse{}) {
+	if body == (tokenResponse{}) {
+		return nil, handleErrorResponse(bodyBytes)
+	}
+
+	token := &oauth2.Token{
+		AccessToken:  body.Data.AccessToken,
+		TokenType:    "Bearer",
+		RefreshToken: body.Data.RefreshToken,
+		Expiry:       time.Now().Add(time.Second * time.Duration(body.Data.ExpiresIn)),
+	}
+
+	if token.AccessToken == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: server response missing access_token")
+	}
+
+	tokenExtra := map[string]interface{}{
+		"open_id": body.Data.OpenID,
+	}
+
+	return token.WithExtra(tokenExtra), nil
+}
+
+// RefreshToken refreshes the access token of the user.
+func RefreshToken(ctx context.Context, clientKey, refreshToken string) (*oauth2.Token, error) {
+	if clientKey == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: client key cannot be empty")
+	}
+
+	if refreshToken == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: refresh token cannot be empty")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpointRefresh, nil)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	q := req.URL.Query()
+	q.Add("client_key", clientKey)
+	q.Add("refresh_token", refreshToken)
+	q.Add("grant_type", "refresh_token")
+	req.URL.RawQuery = q.Encode()
+
+	response, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	defer response.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	var body tokenResponse
+	if err = json.Unmarshal(bodyBytes, &body); err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	if body == (tokenResponse{}) {
 		return nil, handleErrorResponse(bodyBytes)
 	}
 

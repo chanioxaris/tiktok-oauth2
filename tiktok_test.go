@@ -163,7 +163,7 @@ func TestConfigExchangeSuccess(t *testing.T) {
 		http.MethodPost,
 		cfg.Endpoint.TokenURL,
 		accessTokenParameters,
-		httpmock.NewStringResponder(http.StatusOK, responseSuccessAccessToken),
+		httpmock.NewStringResponder(http.StatusOK, responseSuccessToken),
 	)
 
 	token, err := tiktok.ConfigExchange(context.Background(), testNewOauthConfig(t), "test-code")
@@ -225,6 +225,115 @@ func TestConfigExchangeEmptyAccessToken(t *testing.T) {
 	)
 
 	_, err := tiktok.ConfigExchange(context.Background(), testNewOauthConfig(t), "test-code")
+	if err == nil {
+		t.Fatal("expected error but got nil")
+	}
+
+	if !strings.Contains(err.Error(), "server response missing access_token") {
+		t.Fatalf("expected error to contain 'server response missing access_token', but got '%v'", err)
+	}
+}
+
+func TestRefreshTokenInvalidArguments(t *testing.T) {
+	tests := []struct {
+		name          string
+		clientKey     string
+		refreshToken  string
+		errorContains string
+	}{
+		{
+			name:          "empty client key",
+			clientKey:     "",
+			errorContains: "client key cannot be empty",
+		},
+		{
+			name:          "empty refresh token",
+			clientKey:     "test-client-key",
+			refreshToken:  "",
+			errorContains: "refresh token cannot be empty",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tiktok.RefreshToken(context.Background(), tt.clientKey, tt.refreshToken)
+			if err == nil {
+				t.Fatal("expected error but got nil")
+			}
+
+			if !strings.Contains(err.Error(), tt.errorContains) {
+				t.Fatalf("expected error to contain '%s', but got '%v'", tt.errorContains, err)
+			}
+		})
+	}
+}
+
+func TestRefreshTokenSuccess(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	httpmock.RegisterResponderWithQuery(
+		http.MethodPost,
+		"https://open-api.tiktok.com/oauth/refresh_token/",
+		refreshTokenParameters,
+		httpmock.NewStringResponder(http.StatusOK, responseSuccessToken),
+	)
+
+	token, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	if token.AccessToken != "test-access-token" {
+		t.Fatalf("expected access token 'test-access-token', but got %s", token.AccessToken)
+	}
+
+	if token.TokenType != "Bearer" {
+		t.Fatalf("expected token type 'Bearer', but got %s", token.TokenType)
+	}
+
+	if token.RefreshToken != "test-refresh-token" {
+		t.Fatalf("expected refresh token 'test-refresh-token', but got %s", token.RefreshToken)
+	}
+
+	if extraOpenID := token.Extra("open_id"); extraOpenID != "test-open-id" {
+		t.Fatalf("expected extra field open_id 'test-open-id', but got %s", extraOpenID)
+	}
+}
+
+func TestRefreshTokenError(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	httpmock.RegisterResponderWithQuery(
+		http.MethodPost,
+		"https://open-api.tiktok.com/oauth/refresh_token/",
+		refreshTokenParameters,
+		httpmock.NewStringResponder(http.StatusOK, responseError),
+	)
+
+	_, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
+	if err == nil {
+		t.Fatal("expected error but got nil")
+	}
+
+	if !strings.Contains(err.Error(), "Request error [1000]") {
+		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
+	}
+}
+
+func TestRefreshTokenEmptyAccessToken(t *testing.T) {
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	httpmock.RegisterResponderWithQuery(
+		http.MethodPost,
+		"https://open-api.tiktok.com/oauth/refresh_token/",
+		refreshTokenParameters,
+		httpmock.NewStringResponder(http.StatusOK, responseEmptyAccessToken),
+	)
+
+	_, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
 	if err == nil {
 		t.Fatal("expected error but got nil")
 	}

@@ -3,6 +3,7 @@ package tiktok
 const (
 	endpointAuth     = "https://open-api.tiktok.com/platform/oauth/connect/"
 	endpointToken    = "https://open-api.tiktok.com/oauth/access_token/"
+	endpointRefresh  = "https://open-api.tiktok.com/oauth/refresh_token/"
 	endpointUserInfo = "https://open-api.tiktok.com/oauth/userinfo/"
 )
 
@@ -24,7 +25,7 @@ type userInfoResponse struct {
 	}
 }
 
-type configExchangeResponse struct {
+type tokenResponse struct {
 	Data struct {
 		OpenID           string `json:"open_id"`
 		Scope            string `json:"scope"`
