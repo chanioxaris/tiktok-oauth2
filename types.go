@@ -1,5 +1,29 @@
 package tiktok
 
+const (
+	endpointAuth     = "https://open-api.tiktok.com/platform/oauth/connect/"
+	endpointToken    = "https://open-api.tiktok.com/oauth/access_token/"
+	endpointUserInfo = "https://open-api.tiktok.com/oauth/userinfo/"
+)
+
+type UserInfo struct {
+	OpenID       string
+	UnionID      string
+	Avatar       string
+	AvatarLarger string
+	DisplayName  string
+}
+
+type userInfoResponse struct {
+	Data struct {
+		OpenID       string `json:"open_id"`
+		UnionID      string `json:"union_id"`
+		Avatar       string `json:"avatar"`
+		AvatarLarger string `json:"avatar_larger"`
+		DisplayName  string `json:"display_name"`
+	}
+}
+
 type configExchangeResponse struct {
 	Data struct {
 		OpenID           string `json:"open_id"`

@@ -2,15 +2,17 @@ package tiktok_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/chanioxaris/tiktok-oauth2"
 	"golang.org/x/oauth2"
 )
 
 var (
-	responseAccessTokenSuccess = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","access_token":"test-access-token","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
-	responseAccessTokenError   = `{"data":{"captcha":"","desc_url":"","description":"Request error","error_code":1000},"message":""}`
-	responseAccessTokenEmpty   = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
+	responseSuccessAccessToken = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","access_token":"test-access-token","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
+	responseError              = `{"data":{"captcha":"","desc_url":"","description":"Request error","error_code":1000},"message":""}`
+	responseEmptyAccessToken   = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
+	responseSuccessUserInfo    = `{"data":{"open_id":"test-open-id","union_id":"test-union-id","avatar":"test-avatar","avatar_larger":"test-avatar-larger","display_name":"test-display-name"}}`
 )
 
 var (
@@ -19,6 +21,11 @@ var (
 		"client_secret": "test-client-secret",
 		"code":          "test-code",
 		"grant_type":    "authorization_code",
+	}
+
+	userInfoParameters = map[string]string{
+		"access_token": "test-access-token",
+		"open_id":      "test-open-id",
 	}
 )
 
@@ -36,4 +43,15 @@ func testNewOauthConfig(t *testing.T) *oauth2.Config {
 	}
 
 	return cfg
+}
+
+func testNewOauthToken(t *testing.T) *oauth2.Token {
+	t.Helper()
+
+	return &oauth2.Token{
+		AccessToken:  "test-access-token",
+		TokenType:    "test-token-type",
+		RefreshToken: "test-refresh-token",
+		Expiry:       time.Now().Add(time.Second * 86400),
+	}
 }

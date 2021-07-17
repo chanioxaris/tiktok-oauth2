@@ -37,8 +37,8 @@ func NewConfig(clientID, clientSecret, redirectURL string, scopes ...string) (*o
 		RedirectURL:  redirectURL,
 		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:   "https://open-api.tiktok.com/platform/oauth/connect/",
-			TokenURL:  "https://open-api.tiktok.com/oauth/access_token/",
+			AuthURL:   endpointAuth,
+			TokenURL:  endpointToken,
 			AuthStyle: oauth2.AuthStyleInParams,
 		},
 	}
@@ -60,7 +60,7 @@ func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*o
 		return nil, fmt.Errorf("tiktok-oauth2: code cannot be empty")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, config.Endpoint.TokenURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpointToken, nil)
 	if err != nil {
 		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
 	}
@@ -109,6 +109,62 @@ func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*o
 	}
 
 	return token.WithExtra(tokenExtra), nil
+}
+
+// RetrieveUserInfo returns some basic information of a given TikTok user based on the open id.
+func RetrieveUserInfo(ctx context.Context, token *oauth2.Token) (*UserInfo, error) {
+	if token == nil {
+		return nil, fmt.Errorf("tiktok-oauth2: token cannot be nil")
+	}
+
+	extraOpenID := token.Extra("open_id")
+	if extraOpenID == nil {
+		return nil, fmt.Errorf("tiktok-oauth2: token missing open id")
+	}
+
+	openID, ok := extraOpenID.(string)
+	if !ok {
+		return nil, fmt.Errorf("tiktok-oauth2: expected token open id to be a string")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpointUserInfo, nil)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	q := req.URL.Query()
+	q.Add("access_token", token.AccessToken)
+	q.Add("open_id", openID)
+	req.URL.RawQuery = q.Encode()
+
+	response, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	defer response.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	var body userInfoResponse
+	if err = json.Unmarshal(bodyBytes, &body); err != nil {
+		return nil, fmt.Errorf("tiktok-oauth2: %w", err)
+	}
+
+	if body == (userInfoResponse{}) {
+		return nil, handleErrorResponse(bodyBytes)
+	}
+
+	return &UserInfo{
+		OpenID:       body.Data.OpenID,
+		UnionID:      body.Data.UnionID,
+		Avatar:       body.Data.Avatar,
+		AvatarLarger: body.Data.AvatarLarger,
+		DisplayName:  body.Data.DisplayName,
+	}, nil
 }
 
 func handleErrorResponse(data []byte) error {

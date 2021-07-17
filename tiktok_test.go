@@ -163,7 +163,7 @@ func TestConfigExchangeSuccess(t *testing.T) {
 		http.MethodPost,
 		cfg.Endpoint.TokenURL,
 		accessTokenParameters,
-		httpmock.NewStringResponder(http.StatusOK, responseAccessTokenSuccess),
+		httpmock.NewStringResponder(http.StatusOK, responseSuccessAccessToken),
 	)
 
 	token, err := tiktok.ConfigExchange(context.Background(), testNewOauthConfig(t), "test-code")
@@ -198,7 +198,7 @@ func TestConfigExchangeError(t *testing.T) {
 		http.MethodPost,
 		cfg.Endpoint.TokenURL,
 		accessTokenParameters,
-		httpmock.NewStringResponder(http.StatusOK, responseAccessTokenError),
+		httpmock.NewStringResponder(http.StatusOK, responseError),
 	)
 
 	_, err := tiktok.ConfigExchange(context.Background(), testNewOauthConfig(t), "test-code")
@@ -221,7 +221,7 @@ func TestConfigExchangeEmptyAccessToken(t *testing.T) {
 		http.MethodPost,
 		cfg.Endpoint.TokenURL,
 		accessTokenParameters,
-		httpmock.NewStringResponder(http.StatusOK, responseAccessTokenEmpty),
+		httpmock.NewStringResponder(http.StatusOK, responseEmptyAccessToken),
 	)
 
 	_, err := tiktok.ConfigExchange(context.Background(), testNewOauthConfig(t), "test-code")
@@ -231,5 +231,104 @@ func TestConfigExchangeEmptyAccessToken(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "server response missing access_token") {
 		t.Fatalf("expected error to contain 'server response missing access_token', but got '%v'", err)
+	}
+}
+
+func TestRetrieveUserInfoInvalidArguments(t *testing.T) {
+	tests := []struct {
+		name          string
+		token         *oauth2.Token
+		errorContains string
+	}{
+		{
+			name:          "nil token",
+			token:         nil,
+			errorContains: "token cannot be nil",
+		},
+		{
+			name:          "token without open_id",
+			token:         testNewOauthToken(t),
+			errorContains: "token missing open id",
+		},
+		{
+			name:          "token with invalid open_id type",
+			token:         testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": 1}),
+			errorContains: "expected token open id to be a string",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tiktok.RetrieveUserInfo(context.Background(), tt.token)
+			if err == nil {
+				t.Fatal("expected error but got nil")
+			}
+
+			if !strings.Contains(err.Error(), tt.errorContains) {
+				t.Fatalf("expected error to contain '%s', but got '%v'", tt.errorContains, err)
+			}
+		})
+	}
+}
+
+func TestRetrieveUserInfoSuccess(t *testing.T) {
+	token := testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": "test-open-id"})
+
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	httpmock.RegisterResponderWithQuery(
+		http.MethodGet,
+		"https://open-api.tiktok.com/oauth/userinfo/",
+		userInfoParameters,
+		httpmock.NewStringResponder(http.StatusOK, responseSuccessUserInfo),
+	)
+
+	user, err := tiktok.RetrieveUserInfo(context.Background(), token)
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
+	if user.OpenID != "test-open-id" {
+		t.Fatalf("expected open id 'test-open-id', but got %s", user.OpenID)
+	}
+
+	if user.UnionID != "test-union-id" {
+		t.Fatalf("expected union id 'test-union-id', but got %s", user.UnionID)
+	}
+
+	if user.Avatar != "test-avatar" {
+		t.Fatalf("expected avatar 'test-avatar', but got %s", user.Avatar)
+	}
+
+	if user.AvatarLarger != "test-avatar-larger" {
+		t.Fatalf("expected avatar large 'test-avatar-larger', but got %s", user.AvatarLarger)
+	}
+
+	if user.DisplayName != "test-display-name" {
+		t.Fatalf("expected display name 'test-display-name', but got %s", user.DisplayName)
+	}
+}
+
+func TestRetrieveUserInfoError(t *testing.T) {
+	token := testNewOauthToken(t).WithExtra(map[string]interface{}{"open_id": "test-open-id"})
+
+	httpmock.Activate()
+	t.Cleanup(httpmock.Deactivate)
+
+	httpmock.RegisterResponderWithQuery(
+		http.MethodGet,
+		"https://open-api.tiktok.com/oauth/userinfo/",
+		userInfoParameters,
+		httpmock.NewStringResponder(http.StatusOK, responseError),
+	)
+
+	_, err := tiktok.RetrieveUserInfo(context.Background(), token)
+	if err == nil {
+		t.Fatal("expected error but got nil")
+	}
+
+	if !strings.Contains(err.Error(), "Request error [1000]") {
+		t.Fatalf("expected error to contain 'Request error [1000]', but got '%v'", err)
 	}
 }
