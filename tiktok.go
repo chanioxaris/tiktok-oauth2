@@ -114,9 +114,9 @@ func ConfigExchange(ctx context.Context, config *oauth2.Config, code string) (*o
 }
 
 // RefreshToken refreshes the access token of the user.
-func RefreshToken(ctx context.Context, clientKey, refreshToken string) (*oauth2.Token, error) {
-	if clientKey == "" {
-		return nil, fmt.Errorf("tiktok-oauth2: RefreshToken: client key cannot be empty")
+func RefreshToken(ctx context.Context, clientID, refreshToken string) (*oauth2.Token, error) {
+	if clientID == "" {
+		return nil, fmt.Errorf("tiktok-oauth2: RefreshToken: client id cannot be empty")
 	}
 
 	if refreshToken == "" {
@@ -129,7 +129,7 @@ func RefreshToken(ctx context.Context, clientKey, refreshToken string) (*oauth2.
 	}
 
 	q := req.URL.Query()
-	q.Add("client_key", clientKey)
+	q.Add("client_key", clientID)
 	q.Add("refresh_token", refreshToken)
 	q.Add("grant_type", "refresh_token")
 	req.URL.RawQuery = q.Encode()

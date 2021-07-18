@@ -248,18 +248,18 @@ func TestConfigExchangeEmptyAccessToken(t *testing.T) {
 func TestRefreshTokenInvalidArguments(t *testing.T) {
 	tests := []struct {
 		name          string
-		clientKey     string
+		clientID      string
 		refreshToken  string
 		errorContains string
 	}{
 		{
-			name:          "empty client key",
-			clientKey:     "",
-			errorContains: "RefreshToken: client key cannot be empty",
+			name:          "empty client id",
+			clientID:      "",
+			errorContains: "RefreshToken: client id cannot be empty",
 		},
 		{
 			name:          "empty refresh token",
-			clientKey:     "test-client-key",
+			clientID:      "test-client-id",
 			refreshToken:  "",
 			errorContains: "RefreshToken: refresh token cannot be empty",
 		},
@@ -267,7 +267,7 @@ func TestRefreshTokenInvalidArguments(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := tiktok.RefreshToken(context.Background(), tt.clientKey, tt.refreshToken)
+			_, err := tiktok.RefreshToken(context.Background(), tt.clientID, tt.refreshToken)
 			if err == nil {
 				t.Fatal("expected error but got nil")
 			}
@@ -290,7 +290,7 @@ func TestRefreshTokenSuccess(t *testing.T) {
 		httpmock.NewStringResponder(http.StatusOK, responseSuccessToken),
 	)
 
-	token, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
+	token, err := tiktok.RefreshToken(context.Background(), "test-client-id", "test-refresh-token")
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -334,7 +334,7 @@ func TestRefreshTokenError(t *testing.T) {
 		httpmock.NewStringResponder(http.StatusOK, responseError),
 	)
 
-	_, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
+	_, err := tiktok.RefreshToken(context.Background(), "test-client-id", "test-refresh-token")
 	if err == nil {
 		t.Fatal("expected error but got nil")
 	}
@@ -355,7 +355,7 @@ func TestRefreshTokenEmptyAccessToken(t *testing.T) {
 		httpmock.NewStringResponder(http.StatusOK, responseEmptyAccessToken),
 	)
 
-	_, err := tiktok.RefreshToken(context.Background(), "test-client-key", "test-refresh-token")
+	_, err := tiktok.RefreshToken(context.Background(), "test-client-id", "test-refresh-token")
 	if err == nil {
 		t.Fatal("expected error but got nil")
 	}

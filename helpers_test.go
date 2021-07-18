@@ -17,14 +17,14 @@ var (
 
 var (
 	accessTokenParameters = map[string]string{
-		"client_key":    "test-client-key",
+		"client_key":    "test-client-id",
 		"client_secret": "test-client-secret",
 		"code":          "test-code",
 		"grant_type":    "authorization_code",
 	}
 
 	refreshTokenParameters = map[string]string{
-		"client_key":    "test-client-key",
+		"client_key":    "test-client-id",
 		"refresh_token": "test-refresh-token",
 		"grant_type":    "refresh_token",
 	}
@@ -44,7 +44,7 @@ func testNewOauthConfig(t *testing.T) *oauth2.Config {
 	t.Helper()
 
 	cfg, err := tiktok.NewConfig(
-		"test-client-key",
+		"test-client-id",
 		"test-client-secret",
 		"test-redirect-url",
 		"test-scope-1", "test-scope-2",
