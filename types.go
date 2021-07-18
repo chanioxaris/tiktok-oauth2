@@ -38,6 +38,17 @@ type tokenResponse struct {
 	} `json:"data"`
 }
 
+type revokeResponse struct {
+	Data struct {
+		Captcha     string `json:"captcha"`
+		DescURL     string `json:"desc_url"`
+		Description string `json:"description"`
+		ErrorCode   int    `json:"error_code"`
+		LogID       string `json:"log_id"`
+	}
+	Message string `json:"message"`
+}
+
 type errorResponse struct {
 	Data struct {
 		Captcha     string `json:"captcha"`

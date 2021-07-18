@@ -204,7 +204,12 @@ func RevokeAccess(ctx context.Context, token *oauth2.Token) error {
 		return fmt.Errorf("tiktok-oauth2: RevokeAccess: %w", err)
 	}
 
-	if len(bodyBytes) != 0 {
+	var body revokeResponse
+	if err = json.Unmarshal(bodyBytes, &body); err != nil {
+		return fmt.Errorf("tiktok-oauth2: RevokeAccess: %w", err)
+	}
+
+	if body.Message != "success" {
 		return fmt.Errorf("tiktok-oauth2: RevokeAccess: %w", handleErrorResponse(bodyBytes))
 	}
 

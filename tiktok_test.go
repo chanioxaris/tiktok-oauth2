@@ -412,7 +412,7 @@ func TestRevokeAccessSuccess(t *testing.T) {
 		http.MethodPost,
 		"https://open-api.tiktok.com/oauth/revoke/",
 		revokeParameters,
-		httpmock.NewStringResponder(http.StatusOK, ""),
+		httpmock.NewStringResponder(http.StatusOK, responseSuccessRevoke),
 	)
 
 	err := tiktok.RevokeAccess(context.Background(), token)

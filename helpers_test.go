@@ -10,6 +10,7 @@ import (
 
 var (
 	responseSuccessToken     = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","access_token":"test-access-token","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
+	responseSuccessRevoke    = `{"data":{"captcha":"","desc_url":"","description":"","error_code":0,"log_id":"test-log-id"},"message":"success"}`
 	responseError            = `{"data":{"captcha":"","desc_url":"","description":"Request error","error_code":1000},"message":""}`
 	responseEmptyAccessToken = `{"data":{"open_id":"test-open-id","scope":"test-scope-1,test-scope-2","expires_in":86400,"refresh_token":"test-refresh-token","refresh_expires_in":31536000}}`
 	responseSuccessUserInfo  = `{"data":{"open_id":"test-open-id","union_id":"test-union-id","avatar":"test-avatar","avatar_larger":"test-avatar-larger","display_name":"test-display-name"}}`
